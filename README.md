@@ -13,7 +13,8 @@ Install Chromaprint:
 
 Install:
 
-    sudo pip install acoustid-priv-tools
+    sudo virtualenv /opt/acoustid-priv-tools
+    sudo /opt/acoustid-priv-tools/bin/pip install https://github.com/acoustid/acoustid-priv-tools/archive/master.zip
 
 Configure:
 
@@ -26,3 +27,7 @@ Configure:
 Upload fingerprints for your music catalog:
 
     acoustid-priv-sync -d /path/to/music
+
+Monitor an online stream with hourly reports in CSV files:
+
+    acoustid-priv-monitor -o 'acoustid-results-stream1-%Y-%m-%d-%H.csv' http://example.com/stream1.mp3

@@ -11,6 +11,9 @@ setup(
     description='Command line tools for api.acoustid.biz',
     install_requires=['mediafile', 'requests'],
     entry_points={
-        'console_scripts': ['acoustid-priv-sync=acoustid_priv_tools.sync:main'],
+        'console_scripts': [
+            'acoustid-priv-sync=acoustid_priv_tools.sync:main',
+            'acoustid-priv-monitor=acoustid_priv_tools.monitor:main',
+        ],
     },
 )
