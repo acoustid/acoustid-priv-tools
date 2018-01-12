@@ -15,6 +15,14 @@ Install:
 
     sudo pip install acoustid-priv-tools
 
+Configure:
+
+    $EDITOR ~/.config/acoustid-priv.conf
+
+    [main]
+    api-key=awniadInOk8
+    catalog=test1
+
 Upload fingerprints for your music catalog:
 
     acoustid-priv-sync -d /path/to/music
