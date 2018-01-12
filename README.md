@@ -20,8 +20,8 @@ Configure:
     $EDITOR ~/.config/acoustid-priv.conf
 
     [main]
-    api-key=awniadInOk8
-    catalog=test1
+    api-key=XXX
+    catalog=mymusic
 
 Upload fingerprints for your music catalog:
 
