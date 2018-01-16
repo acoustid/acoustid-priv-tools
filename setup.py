@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name='acoustid-priv-tools',
     version='0.1',
-    packages=find_packages('acoustid_priv_tools'),
+    packages=find_packages(),
     license='MIT',
     author='Lukas Lalinsky',
     author_email='lukas@acoustid.biz',
