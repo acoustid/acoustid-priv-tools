@@ -13,7 +13,7 @@ Install Chromaprint:
 
 Install:
 
-    sudo virtualenv /opt/acoustid-priv-tools
+    sudo virtualenv -p python2 /opt/acoustid-priv-tools
     sudo /opt/acoustid-priv-tools/bin/pip install https://github.com/acoustid/acoustid-priv-tools/archive/master.zip
 
 Configure:
