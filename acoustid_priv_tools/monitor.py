@@ -145,8 +145,8 @@ def main():
             output.writerow({
                 'time': ts.strftime('%Y-%m-%d %H:%M:%S'),
                 'track_id': track['id'],
-                'artist': track['metadata'].get('artist'),
-                'title': track['metadata'].get('title'),
+                'artist': track['metadata'].get('artist', '').encode('utf8'),
+                'title': track['metadata'].get('title', '').encode('utf8'),
             })
             break
         else:
