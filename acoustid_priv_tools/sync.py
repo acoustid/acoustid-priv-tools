@@ -118,6 +118,17 @@ def main():
             track['path'] = path
             tracks[track_id] = track
 
+    count_deleted = 0
+    if args.delete:
+        tracks_to_delete = set(existing_tracks.keys()) - set(tracks.keys())
+        for track_id in tracks_to_delete:
+            logger.info('Deleting track %s', track_id)
+            url = '{}/{}'.format(base_url, urllib.quote(track_id, safe=''))
+            rv = session.delete(url, json={})
+            rv.raise_for_status()
+            count_deleted += 1
+            count_total -= 1
+
     count_added = 0
     tracks_to_add = set(tracks.keys()) - set(existing_tracks.keys())
     for track_id in tracks_to_add:
@@ -130,17 +141,6 @@ def main():
         rv.raise_for_status()
         count_added += 1
         count_total += 1
-
-    count_deleted = 0
-    if args.delete:
-        tracks_to_delete = set(existing_tracks.keys()) - set(tracks.keys())
-        for track_id in tracks_to_delete:
-            logger.info('Deleting track %s', track_id)
-            url = '{}/{}'.format(base_url, urllib.quote(track_id, safe=''))
-            rv = session.delete(url, json={})
-            rv.raise_for_status()
-            count_deleted += 1
-            count_total -= 1
 
     logger.info('%s tracks in the catalog, %s added, %s deleted', count_total, count_added, count_deleted)
 
