@@ -73,6 +73,10 @@ def read_process_stdout(process, queue):
         queue.put((False, None))
 
 
+class MonitoringFailed(Exception):
+    pass
+
+
 def monitor_stream(url, chunk_length):
     with create_ffmpeg_process(url) as ffmpeg_process:
         with create_fpcalc_process(ffmpeg_process, chunk_length) as fpcalc_process:
@@ -92,6 +96,10 @@ def monitor_stream(url, chunk_length):
                     if result[1] is not None:
                         raise result[1]
                     else:
+                        if ffmpeg_process.returncode != 0:
+                            raise MonitoringFailed()
+                        if fpcalc_process.returncode != 0:
+                            raise MonitoringFailed()
                         break
 
 
@@ -131,27 +139,36 @@ def main():
 
     output = None
     output_name = None
-    for chunk in monitor_stream(args.url, args.chunk):
-        url = '{}/{}'.format(base_url, '_search')
-        rv = session.post(url, json={'fingerprint': chunk['fingerprint'], 'stream': True})
-        if rv.status_code != 200:
-            logger.error('Search request failed')
+    retry_delay = 1
+    while True:
+        try:
+            for chunk in monitor_stream(args.url, args.chunk):
+                retry_delay = 1
+                url = '{}/{}'.format(base_url, '_search')
+                rv = session.post(url, json={'fingerprint': chunk['fingerprint'], 'stream': True})
+                if rv.status_code != 200:
+                    logger.error('Search request failed')
+                    continue
+                data = rv.json()
+                ts = datetime.datetime.fromtimestamp(chunk['timestamp'])
+                output, output_name = open_output_file(output, output_name, ts)
+                for track in data['results']:
+                    logger.info('Found track %s (%s - %s)', track['id'], track['metadata'].get('artist'), track['metadata'].get('title'))
+                    output.writerow({
+                        'time': ts.strftime('%Y-%m-%d %H:%M:%S'),
+                        'track_id': track['id'],
+                        'artist': track['metadata'].get('artist', '').encode('utf8'),
+                        'title': track['metadata'].get('title', '').encode('utf8'),
+                    })
+                    break
+                else:
+                    logger.debug('No results')
+                    output.writerow({'time': ts.strftime('%Y-%m-%d %H:%M:%S'), 'track_id': '', 'artist': '', 'title': ''})
+        except MonitoringFailed:
+            logger.debug('Sleeping for %.2f seconds', retry_delay)
+            time.sleep(retry_delay)
+            retry_delay = min(60, retry_delay * 1.6)
             continue
-        data = rv.json()
-        ts = datetime.datetime.fromtimestamp(chunk['timestamp'])
-        output, output_name = open_output_file(output, output_name, ts)
-        for track in data['results']:
-            logger.info('Found track %s (%s - %s)', track['id'], track['metadata'].get('artist'), track['metadata'].get('title'))
-            output.writerow({
-                'time': ts.strftime('%Y-%m-%d %H:%M:%S'),
-                'track_id': track['id'],
-                'artist': track['metadata'].get('artist', '').encode('utf8'),
-                'title': track['metadata'].get('title', '').encode('utf8'),
-            })
-            break
-        else:
-            logger.debug('No results')
-            output.writerow({'time': ts.strftime('%Y-%m-%d %H:%M:%S'), 'track_id': '', 'artist': '', 'title': ''})
 
 
 if __name__ == '__main__':
